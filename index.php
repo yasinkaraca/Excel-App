@@ -21,9 +21,12 @@
 	}
 	
 	function fileTable(){
+		if(!is_dir("files"))
+			mkdir("files");
+		
 		$filenames = array_slice(scandir("files"), 2);
 		
-		echo "<div style='margin: 100; display: inline-block; width: 30%'>
+		echo "<div style='margin: 100; display: inline-block; width: 35%'>
 				<h3>Files</h3>
 				<div class='list-group'>";
 		foreach($filenames as $name)
@@ -102,7 +105,6 @@
 			$c = $change["column"];
 			$sheets[$s][$r][$c] = $change["data"];
 		}
-		
 		
 		if($no == count($sheets))
 			$_SESSION["no"] = $no = 0;
@@ -220,7 +222,7 @@
 			$sheets[$no]["column"]--;
 			
 			for($i = 0; $i < count($sheets[$no]) - 2; $i++){
-				if(!empty($sheets[$no][$i][$col])) array_splice($sheets[$no][$i], $col, 1);
+				array_splice($sheets[$no][$i], $col, 1);//if(!empty($sheets[$no][$i][$col])) 
 			}
 		}
 		return $sheets;
@@ -271,17 +273,21 @@
 	
 	function sortRow($row, $asc){
 		if(isset($_SESSION["sheets"]))
-			$sheets = $_SESSION["sheets"];
+				$sheets = $_SESSION["sheets"];
 		if(isset($_SESSION["no"]))
 			$no = $_SESSION["no"];
 		if(isset($_SESSION["name"]))
 			$name = $_SESSION["name"];
-		
-		if($asc)
-			sort($sheets[$no][$row]);
-		else
-			rsort($sheets[$no][$row]);
-		
+			
+		if(count($_SESSION["changes"])){
+			?><script>alert("Save before sort operation");</script><?php
+		}
+		else{
+			if($asc)
+				sort($sheets[$no][$row]);
+			else
+				rsort($sheets[$no][$row]);
+		}
 		prepareSheet($sheets, $no, $name);
 	}
 	
@@ -293,19 +299,23 @@
 		if(isset($_SESSION["name"]))
 			$name = $_SESSION["name"];
 		
-		$column = [];
-		
-		for($i = 0; $i < count($sheets[$no]) - 2; $i++)
-			if(!empty($sheets[$no][$i][$col])) $column[] = $sheets[$no][$i][$col];
-		
-		if($asc)
-			sort($column);
-		else
-			rsort($column);
-		
-		for($i = 0; $i < count($sheets[$no]) - 2; $i++)
-			if(!empty($sheets[$no][$i][$col])) $sheets[$no][$i][$col] = $column[$i];
-		
+		if(count($_SESSION["changes"])){
+			?><script>alert("Save before sort operation");</script><?php
+		}
+		else{
+			$column = [];
+			
+			for($i = 0; $i < count($sheets[$no]) - 2; $i++)
+				$column[] = $sheets[$no][$i][$col];//if(!empty($sheets[$no][$i][$col])) 
+			
+			if($asc)
+				sort($column);
+			else
+				rsort($column);
+			
+			for($i = 0; $i < count($sheets[$no]) - 2; $i++)
+				$sheets[$no][$i][$col] = $column[$i];//if(!empty($column[$i])) 
+		}
 		prepareSheet($sheets, $no, $name);
 	}
 		
